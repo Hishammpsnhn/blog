@@ -14,8 +14,8 @@ const Home = () => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Grid container spacing={2} alignItems="stretch">
-              {[1, 2, 3, 4].map((item) => (
-                <Grid item xs={12} sm={6} md={3} key={item}>
+              {[1, 2, 3, 4,8,2].map((item) => (
+                <Grid item xs={12} sm={6} md={2} key={item}>
                   <BlogCard />
                 </Grid>
               ))}

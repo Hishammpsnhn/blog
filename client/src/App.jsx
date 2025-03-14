@@ -8,15 +8,15 @@ import Form from "./components/Form";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import AuthPage from "./pages/Auth";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
-
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/new" element={<Form/>} />
-        <Route path="/auth" element={<AuthPage/>} />
+        <Route path="/" element={<Home />} />
+        <Route path="/new" element={<PrivateRoute><Form/></PrivateRoute>} />
+        <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </>
   );

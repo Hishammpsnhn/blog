@@ -2,15 +2,19 @@ import React, { createContext, useEffect, useState } from 'react';
 
 export const AuthContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('userInfo');
-
-    if (storedUser) {
-      console.log(JSON.parse(storedUser))
-      setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem("token"); 
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUser(decoded);
+      } catch (error) {
+        console.error("Invalid token");
+        localStorage.removeItem("token");
+      }
     }
   }, []);
 
