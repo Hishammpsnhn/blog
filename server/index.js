@@ -11,7 +11,7 @@ app.use(express.json())
 
 dbConfig();
 
-app.use('/api/user',authRoute)
+app.use('/api/auth',authRoute)
 app.use('/api/post',postRoute)
 
 
