@@ -12,12 +12,15 @@ import {
 } from "@mui/material";
 // import { login, signUp } from "../../action/userAction";
 import { useNavigate } from "react-router-dom";
+import { login, signup } from "../../action/authAction";
+import { AuthContext } from "../components/AuthProvider";
 // import { AuthContext } from "../../components/AuthProvider";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  // const { user, setUser } = useContext(AuthContext);
- 
+  const { user, setUser } = useContext(AuthContext);
+  console.log(user);
+
   const [activeTab, setActiveTab] = useState(0);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
@@ -34,26 +37,28 @@ const AuthPage = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("Login Data:", loginData);
-    //const user = await login(loginData);
+    const { user, token } = await login(loginData);
     if (user) {
       setUser(user);
+      localStorage.setItem("token", JSON.stringify(token));
       navigate("/");
     }
   };
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
-   // const user = await signUp(signupData);
+    const { user, token } = await signup(signupData);
     if (user) {
       setUser(user);
+      localStorage.setItem("token", JSON.stringify(token));
       navigate("/");
     }
   };
-  // useEffect(() => {
-  //   if (user) {
-  //     navigate("/");
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user]);
 
   return (
     <Container maxWidth="sm">

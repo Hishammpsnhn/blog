@@ -1,11 +1,16 @@
 import { Paper, Typography, Box, Button } from "@mui/material";
-import React from "react";
+import React, { useContext } from "react";
 import MemoryIcon from "@mui/icons-material/Memory";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthProvider";
 
 const Header = () => {
   const navigate = useNavigate();
-  const handleLogout = () => {};
+  const { user, setUser } = useContext(AuthContext);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
 
   return (
     <Paper
@@ -22,7 +27,7 @@ const Header = () => {
     >
       {/* Left Section: Icon and Title */}
       <Box display="flex" alignItems="center" gap={2}>
-        <MemoryIcon sx={{ fontSize: 40 }} /> 
+        <MemoryIcon sx={{ fontSize: 40 }} />
         <Typography variant="h4" component="h1" fontWeight="bold">
           Memories
         </Typography>
@@ -43,16 +48,18 @@ const Header = () => {
         >
           Create Post
         </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleLogout}
-          sx={{
-            padding: 1,
-          }}
-        >
-          LOGOUT
-        </Button>
+        {user && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleLogout}
+            sx={{
+              padding: 1,
+            }}
+          >
+            LOGOUT
+          </Button>
+        )}
       </Box>
     </Paper>
   );

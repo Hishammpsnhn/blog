@@ -8,7 +8,8 @@ import generateToken from "../utils/generateToken.js";
 // @access  Public
 export const login = async(req, res) => {
     const { email, password } = req.body;
-    if (!email.trim() || !password.trim()) {
+    console.log(email,password)
+    if (!email|| !password) {
       res.status(400).json({ message: "Please enter all the fields" });
       return;
     }
