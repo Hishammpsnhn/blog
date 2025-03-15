@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../model/PostModel.js";
 import PostModel from "../model/PostModel.js";
 
@@ -18,8 +19,13 @@ export const getAllPosts = async (req, res) => {
 // @access  Private
 export const createPosts = async (req, res) => {
   try {
-    const { title, desc, image,author } = req.body;
-    const newPost = await new Post({ title, desc, image,author });
+    const { title, desc, imageUrl } = req.body;
+    const newPost = await new Post({
+      title,
+      desc,
+      image: imageUrl,
+      author: req.user,
+    });
     const savedPost = await newPost.save();
     return res.status(200).json({ success: true, post: newPost });
   } catch (error) {
@@ -30,7 +36,7 @@ export const createPosts = async (req, res) => {
 // @desc    Edit post
 // @route   PUT /api/post/:id
 // @access  Private
-export const updatePost = async (req,res) => {
+export const updatePost = async (req, res) => {
   try {
     const { title, desc, image } = req.body;
     const { id } = req.params;
@@ -54,12 +60,21 @@ export const updatePost = async (req,res) => {
 // @desc    delete post
 // @route   DELETE /api/post/:id
 // @access  Private
-export const deletePost = async (req,res) => {
-    try {
-        const {id} = req.params;
-        const res = await Post.findByIdAndDelete(id)
-        return res.status(200).json({success:true,message:"Deleted Successfully"})
-    } catch (error) {
-        return res.status(404).json({message:error})
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await Post.findByIdAndDelete(
+      new mongoose.Types.ObjectId(id)
+    );
+    console.log(deletedPost);
+    if (!deletedPost) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
+    return res.status(200).json({ success: true, message: "Deleted Successfully" });
+  } catch (error) {
+    console.log(error)
+    return res.status(404).json({ message: error });
+  }
 };
