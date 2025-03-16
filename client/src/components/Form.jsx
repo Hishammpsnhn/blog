@@ -1,24 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import Header from "./Header";
 import axios from "axios";
+import { createPost, getPost, updatePost } from "../../action/postAction";
+import { useNavigate, useParams } from "react-router-dom";
 
-let initialState = {
+const initialState = {
   title: "",
   desc: "",
   imageUrl: "",
   imageName: "",
 };
 
-const Form = ({ setPost }) => {
+const Form = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [formData, setFormData] = useState(initialState);
-
   const [errors, setErrors] = useState({
     title: false,
     desc: false,
     image: false,
   });
-
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -67,11 +69,10 @@ const Form = ({ setPost }) => {
       setUploading(false);
     }
   };
-
+console.log(formData)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate inputs
     const newErrors = {
       title: formData.title.trim() === "",
       desc: formData.desc.trim() === "",
@@ -80,16 +81,43 @@ const Form = ({ setPost }) => {
 
     setErrors(newErrors);
 
-    if (!Object.values(newErrors).some((error) => error)) {
+    if (!Object.values(newErrors).some(Boolean)) {
       setLoading(true);
-      console.log("Form submitted:", formData);
-      const newPost = await createPost(formData);
-      console.log("New post:", newPost);
-      setPost((prev) => [...prev, newPost]);
-      setFormData(initialState);
-      setLoading(false);
+      try {
+        if (id) {
+          console.log(formData);
+          const res = await updatePost(id, formData);
+          console.log(res);
+          if (res.success) {
+            setFormData(initialState);
+            navigate("/");
+          }
+        } else {
+          const res = await createPost(formData);
+          if (res.success) {
+            setFormData(initialState);
+            navigate("/");
+          }
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
+
+  useEffect(() => {
+    if (id) {
+      const fetchBlog = async () => {
+        const res = await getPost(id);
+        if (res.success) {
+          setFormData({ ...res.post, imageUrl: res.post.image });
+        }
+      };
+      fetchBlog();
+    }
+  }, [id]);
 
   return (
     <>
@@ -98,9 +126,8 @@ const Form = ({ setPost }) => {
         component="form"
         onSubmit={handleSubmit}
         sx={{
-          maxWidth: ["70%"],
-
-          mx: 2,
+          maxWidth: "70%",
+          mx: "auto",
           mt: 4,
           p: 3,
           boxShadow: 3,
@@ -108,7 +135,7 @@ const Form = ({ setPost }) => {
         }}
       >
         {formData.imageUrl ? (
-          <Box>
+          <Box display="flex" alignItems="center" gap={2}>
             <img
               src={formData.imageUrl}
               alt="Uploaded"
@@ -120,6 +147,22 @@ const Form = ({ setPost }) => {
                 marginTop: "10px",
               }}
             />
+            {id && (
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{ mt: 2, mb: 2 }}
+                disabled={uploading}
+              >
+                {uploading ? "Uploading..." : "Change"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleImageUpload}
+                />
+              </Button>
+            )}
           </Box>
         ) : (
           <Button
@@ -138,16 +181,17 @@ const Form = ({ setPost }) => {
           </Button>
         )}
 
-        {/* title Input */}
+        {/* Title Input */}
         <TextField
           name="title"
           value={formData.title}
           onChange={handleChange}
           error={errors.title}
-          helperText={errors.title && "Name is required"}
+          helperText={errors.title && "Title is required"}
           fullWidth
           margin="normal"
           variant="standard"
+          placeholder="New Post title here..."
           InputProps={{
             fontFamily: "'Roboto Mono', monospace",
             sx: {
@@ -157,13 +201,10 @@ const Form = ({ setPost }) => {
             },
             disableUnderline: true,
           }}
-          placeholder="New Post title here..."
         />
 
-        {/* Location Input */}
+        {/* Description Input */}
         <TextField
-          placeholder="write your post content here..."
-          variant="standard"
           name="desc"
           value={formData.desc}
           onChange={handleChange}
@@ -173,13 +214,14 @@ const Form = ({ setPost }) => {
           multiline
           rows={12}
           margin="normal"
+          variant="standard"
+          placeholder="Write your post content here..."
           InputProps={{
             fontFamily: "'Roboto Mono', monospace",
             sx: {
               bgcolor: "ghostwhite",
               fontSize: "1.4rem",
               padding: 2,
-              background: "",
               color: "black",
               "& input::placeholder": { color: "#464a5b", opacity: 1 },
             },
@@ -187,18 +229,19 @@ const Form = ({ setPost }) => {
           }}
         />
 
-        {/* Image Upload */}
-
         {errors.image && (
           <Typography color="error" sx={{ mb: 2 }}>
             Please upload an image.
           </Typography>
         )}
 
-        {/* Display Uploaded Image */}
-
-        <Button type="submit" variant="contained" size="large">
-          Publish
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={loading}
+        >
+          {loading ? "Publishing..." : "Publish"}
         </Button>
       </Box>
     </>

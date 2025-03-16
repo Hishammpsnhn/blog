@@ -16,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/new" element={<PrivateRoute><Form/></PrivateRoute>} />
+        <Route path=":id/edit" element={<PrivateRoute><Form/></PrivateRoute>} />
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </>
