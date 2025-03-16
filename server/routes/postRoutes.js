@@ -1,11 +1,12 @@
 import express from 'express'
-import { createPosts, deletePost, getAllPosts, updatePost } from '../controller/postController.js'
+import { createPosts, deletePost, getAllPosts, getPost, updatePost } from '../controller/postController.js'
 import verifyToken from '../middleware/verifyToken.js'
 
 const router = express.Router()
 
 router.use(verifyToken)
 router.get('/',getAllPosts)
+router.get('/:id',getPost)
 router.post('/',createPosts)
 router.put('/:id',updatePost)
 router.delete('/:id',deletePost)

@@ -14,6 +14,21 @@ export const getAllPosts = async (req, res) => {
   }
 };
 
+// @desc    get post
+// @route   GET /api/post/:id
+// @access  Public
+export const getPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+    const post = await PostModel.findById(new mongoose.Types.ObjectId(id));
+    return res.status(200).json({ success: true, post });
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ message: error });
+  }
+};
+
 // @desc    create post
 // @route   POST /api/post
 // @access  Private
@@ -38,11 +53,12 @@ export const createPosts = async (req, res) => {
 // @access  Private
 export const updatePost = async (req, res) => {
   try {
-    const { title, desc, image } = req.body;
+    const { title, desc, imageUrl } = req.body;
     const { id } = req.params;
-    const newPost = await new Post.findByIdAndUpdate(
-      id,
-      { title, desc, image },
+    console.log(id, req.body);
+    const newPost = await Post.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(id),
+      { title, desc, image: imageUrl },
       { new: true, runValidators: true }
     );
 
@@ -51,8 +67,13 @@ export const updatePost = async (req, res) => {
     }
     res
       .status(200)
-      .json({ message: "Post updated successfully", post: newPost });
+      .json({
+        success: true,
+        message: "Post updated successfully",
+        post: newPost,
+      });
   } catch (error) {
+    console.log(error);
     return res.status(404).json({ message: error });
   }
 };
@@ -72,9 +93,11 @@ export const deletePost = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Post not found" });
     }
-    return res.status(200).json({ success: true, message: "Deleted Successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Deleted Successfully" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(404).json({ message: error });
   }
 };
