@@ -9,23 +9,13 @@ import morgan from 'morgan'
 dotenv.config();
 
 const app = express();
-const allowedOrigins = [
-  process.env.CLIENT_URL, 
-  "http://localhost:5173",
-  "https://shiny-speculoos-15727b.netlify.app/" 
-];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: true, 
   methods: "GET,POST,PUT,DELETE",
-  credentials: true,
+  credentials: true, 
 }));
+
 app.use(express.json())
 app.use(morgan())
 
