@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL, 
-  "http://localhost:5174",
+  "http://localhost:5173",
   "https://shiny-speculoos-15727b.netlify.app/" 
 ];
 
