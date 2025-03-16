@@ -9,20 +9,24 @@ import {
   Paper,
   Tabs,
   Tab,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-// import { login, signUp } from "../../action/userAction";
 import { useNavigate } from "react-router-dom";
 import { login, signup } from "../../action/authAction";
 import { AuthContext } from "../components/AuthProvider";
-// import { AuthContext } from "../../components/AuthProvider";
+import { jwtDecode } from "jwt-decode";
+import { loginSchema } from "../../utils/validation";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(AuthContext);
-  console.log(user);
 
   const [activeTab, setActiveTab] = useState(0);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
@@ -32,33 +36,79 @@ const AuthPage = () => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+    setError(null);
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", loginData);
-    const { user, token } = await login(loginData);
-    if (user) {
-      setUser(user);
-      localStorage.setItem("token", JSON.stringify(token));
-      navigate("/");
+    try {
+      setLoading(true);
+      setError(null);
+
+      await loginSchema.validate(loginData);
+
+      const res = await login(loginData);
+      console.log(res);
+      if (res.success) {
+        const { user, token } = res;
+        const decoded = jwtDecode(token);
+        setUser(decoded);
+        localStorage.setItem("token", JSON.stringify(token));
+        navigate("/");
+      } else {
+        setError(res.message);
+      }
+    } catch (err) {
+      console.log(err);
+      if (err.name === "ValidationError") {
+        setError(err.message);
+      }
+      console.error("Login Error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
-    const { user, token } = await signup(signupData);
-    if (user) {
-      setUser(user);
-      localStorage.setItem("token", JSON.stringify(token));
-      navigate("/");
+    try {
+      setLoading(true);
+      setError(null);
+      if (signupData.password !== signupData.confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+
+      await loginSchema.validate({
+        email: signupData.email,
+        password: signupData.password,
+      });
+
+      const res = await signup(signupData);
+      if (res?.success) {
+        const { user, token } = res;
+        const decoded = jwtDecode(token);
+        setUser(decoded);
+        localStorage.setItem("token", JSON.stringify(token));
+        navigate("/");
+      } else {
+        setError(res.message);
+      }
+    } catch (err) {
+      console.log(err);
+      if (err.name === "ValidationError") {
+        setError(err.message);
+      }
+      console.error("Signup Error:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     if (user) {
       navigate("/");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   return (
     <Container maxWidth="sm">
@@ -73,6 +123,12 @@ const AuthPage = () => {
           <Tab label="Login" />
           <Tab label="Signup" />
         </Tabs>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {activeTab === 0 && (
           <Box mt={3}>
@@ -109,10 +165,11 @@ const AuthPage = () => {
                   <Button
                     type="submit"
                     variant="contained"
+                    disabled={loading}
                     fullWidth
                     sx={{ mt: 2 }}
                   >
-                    Login
+                    {loading ? <CircularProgress size={25} /> : "Login"}
                   </Button>
                 </Grid>
               </Grid>
@@ -176,16 +233,27 @@ const AuthPage = () => {
                       })
                     }
                     required
+                    error={
+                      signupData.password !== signupData.confirmPassword &&
+                      signupData.confirmPassword !== ""
+                    }
+                    helperText={
+                      signupData.password !== signupData.confirmPassword &&
+                      signupData.confirmPassword !== ""
+                        ? "Passwords do not match"
+                        : ""
+                    }
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <Button
                     type="submit"
                     variant="contained"
+                    disabled={loading}
                     fullWidth
                     sx={{ mt: 2 }}
                   >
-                    Signup
+                    {loading ? <CircularProgress size={20} /> : "Signup"}
                   </Button>
                 </Grid>
               </Grid>

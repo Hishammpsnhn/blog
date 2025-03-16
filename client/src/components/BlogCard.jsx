@@ -10,16 +10,17 @@ import { Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../utils/TimeConverter";
 
-export default function BlogCard({ id, title, desc, author, image, handleDelete }) {
+export default function BlogCard({ id, title, desc, author, image, handleDelete,createdAt }) {
   const { user } = React.useContext(AuthContext);
   const navigate = useNavigate()
 
   return (
-    <Card variant="outlined" sx={{ width: 220 }}>
+    <Card variant="outlined" sx={{ width: 220 ,cursor:"pointer"}}   >
       <CardOverflow>
         <AspectRatio ratio="2">
-          <img src={image} loading="lazy" alt="Blog Image" />
+          <img onClick={()=>navigate(`${id}/details`)} src={image} loading="lazy" alt="Blog Image" />
         </AspectRatio>
       </CardOverflow>
       <CardContent>
@@ -34,10 +35,10 @@ export default function BlogCard({ id, title, desc, author, image, handleDelete 
             textColor="text.secondary"
             sx={{ fontWeight: "md" }}
           >
-            0 views
+           { formatDate(createdAt)}
           </Typography>
           <Divider orientation="vertical" />
-          {author === user.id && (
+          {author === user?.id && (
             <Box sx={{ display: 'flex', marginLeft: 'auto' }}>
               <IconButton aria-label="delete" size="small" onClick={handleDelete}>
                 <DeleteIcon fontSize="inherit" />

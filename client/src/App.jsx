@@ -9,17 +9,22 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import AuthPage from "./pages/Auth";
 import PrivateRoute from "./components/PrivateRoute";
+import { BlogDetailPage } from "./pages/BlogDetailPage";
+import CustomErrorBoundary from "./components/ErrorBoundary";
+
+
 
 function App() {
   return (
-    <>
+    <CustomErrorBoundary>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/new" element={<PrivateRoute><Form/></PrivateRoute>} />
         <Route path=":id/edit" element={<PrivateRoute><Form/></PrivateRoute>} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path=":id/details" element={<BlogDetailPage />} />
       </Routes>
-    </>
+    </CustomErrorBoundary>
   );
 }
 

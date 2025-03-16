@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import Header from "./Header";
 import axios from "axios";
 import { createPost, getPost, updatePost } from "../../action/postAction";
 import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "./AuthProvider";
 
 const initialState = {
   title: "",
@@ -14,7 +15,9 @@ const initialState = {
 
 const Form = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { id } = useParams();
+
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({
     title: false,
@@ -69,7 +72,6 @@ const Form = () => {
       setUploading(false);
     }
   };
-console.log(formData)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -112,6 +114,10 @@ console.log(formData)
       const fetchBlog = async () => {
         const res = await getPost(id);
         if (res.success) {
+          if (res.post?.author != user.id) {
+            navigate("/");
+            return;
+          }
           setFormData({ ...res.post, imageUrl: res.post.image });
         }
       };

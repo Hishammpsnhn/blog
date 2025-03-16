@@ -7,6 +7,11 @@ export const login = async (formData) => {
     return data
   } catch (error) {
     console.error(error)
+    return {
+      success: false,
+      message: error.response?.data?.message || "Login failed. Please try again.",
+      status: error.response?.status || 500, 
+    };
   }
 };
 export const signup = async (formData) => {
@@ -15,5 +20,10 @@ export const signup = async (formData) => {
     return data
   } catch (error) {
     console.error(error)
+    return {
+      success: false,
+      message: error.response?.data?.message || "Login failed. Please try again.",
+      status: error.response?.status || 500, 
+    };
   }
 };

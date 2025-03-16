@@ -10,6 +10,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    navigate("/");
   };
 
   return (
@@ -48,7 +49,7 @@ const Header = () => {
         >
           Create Post
         </Button>
-        {user && (
+        {user ? (
           <Button
             variant="contained"
             color="error"
@@ -58,6 +59,17 @@ const Header = () => {
             }}
           >
             LOGOUT
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleLogout}
+            sx={{
+              padding: 1,
+            }}
+          >
+            LOGIN
           </Button>
         )}
       </Box>
