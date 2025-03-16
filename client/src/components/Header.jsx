@@ -64,7 +64,7 @@ const Header = () => {
           <Button
             variant="contained"
             color="info"
-            onClick={handleLogout}
+            onClick={()=> navigate('/auth')}
             sx={{
               padding: 1,
             }}
