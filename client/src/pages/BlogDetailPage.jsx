@@ -16,14 +16,23 @@ import Header from "../components/Header";
 export const BlogDetailPage = () => {
   const { id } = useParams();
   const [BlogDetails, setBlogDetails] = useState(null);
+  const [loading,setLoading] = useState(false)
 
   useEffect(() => {
     if (id) {
       console.log(id);
       const fetchBlog = async () => {
-        const res = await getPost(id);
-        if (res.success) {
-          setBlogDetails(res.post);
+        setLoading(true)
+        try {
+          const res = await getPost(id);
+          if (res.success) {
+            setBlogDetails(res.post);
+          }
+          
+        } catch (error) {
+          console.log(error)
+        }finally{
+          setLoading(false)
         }
       };
       fetchBlog();

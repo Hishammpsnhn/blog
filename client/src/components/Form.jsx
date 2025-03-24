@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, TextField, Button, Typography, CircularProgress } from "@mui/material";
 import Header from "./Header";
 import axios from "axios";
 import { createPost, getPost, updatePost } from "../../action/postAction";
@@ -26,6 +26,7 @@ const Form = () => {
   });
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +38,11 @@ const Form = () => {
     const file = e.target.files[0];
     if (!file) {
       setErrors({ ...errors, image: true });
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors({ ...errors, image: "Only JPG, PNG, GIF, and WEBP images are allowed." });
       return;
     }
 
@@ -112,144 +118,158 @@ const Form = () => {
   useEffect(() => {
     if (id) {
       const fetchBlog = async () => {
-        const res = await getPost(id);
-        if (res.success) {
-          if (res.post?.author != user.id) {
-            navigate("/");
-            return;
+        setFetchLoading(true);
+        try {
+          const res = await getPost(id);
+          if (res.success) {
+            if (res.post?.author != user.id) {
+              navigate("/");
+              return;
+            }
+            setFormData({ ...res.post, imageUrl: res.post.image });
           }
-          setFormData({ ...res.post, imageUrl: res.post.image });
+        } catch (error) {
+          console.log(error);
+        }finally{
+          setFetchLoading(false)
         }
       };
       fetchBlog();
+    }else{
+      setFormData(initialState)
     }
   }, [id]);
 
   return (
     <>
       <Header />
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          maxWidth: "70%",
-          mx: "auto",
-          mt: 4,
-          p: 3,
-          boxShadow: 3,
-          borderRadius: 2,
-        }}
-      >
-        {formData.imageUrl ? (
-          <Box display="flex" alignItems="center" gap={2}>
-            <img
-              src={formData.imageUrl}
-              alt="Uploaded"
-              style={{
-                width: "25%",
-                height: "auto",
-                borderRadius: "8px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                marginTop: "10px",
-              }}
-            />
-            {id && (
-              <Button
-                variant="outlined"
-                component="label"
-                sx={{ mt: 2, mb: 2 }}
-                disabled={uploading}
-              >
-                {uploading ? "Uploading..." : "Change"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleImageUpload}
-                />
-              </Button>
-            )}
-          </Box>
-        ) : (
-          <Button
-            variant="outlined"
-            component="label"
-            sx={{ mt: 2, mb: 2 }}
-            disabled={uploading}
-          >
-            {uploading ? "Uploading..." : "Add a Cover Image"}
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImageUpload}
-            />
-          </Button>
-        )}
+      {fetchLoading?(
+        <CircularProgress/>
+      ):(
 
-        {/* Title Input */}
-        <TextField
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          error={errors.title}
-          helperText={errors.title && "Title is required"}
-          fullWidth
-          margin="normal"
-          variant="standard"
-          placeholder="New Post title here..."
-          InputProps={{
-            fontFamily: "'Roboto Mono', monospace",
-            sx: {
-              fontSize: "2.5rem",
-              color: "black",
-              "& input::placeholder": { color: "#464a5b", opacity: 1 },
-            },
-            disableUnderline: true,
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            maxWidth: "70%",
+            mx: "auto",
+            mt: 4,
+            p: 3,
+            boxShadow: 3,
+            borderRadius: 2,
           }}
-        />
-
-        {/* Description Input */}
-        <TextField
-          name="desc"
-          value={formData.desc}
-          onChange={handleChange}
-          error={errors.desc}
-          helperText={errors.desc && "Description is required"}
-          fullWidth
-          multiline
-          rows={12}
-          margin="normal"
-          variant="standard"
-          placeholder="Write your post content here..."
-          InputProps={{
-            fontFamily: "'Roboto Mono', monospace",
-            sx: {
-              bgcolor: "ghostwhite",
-              fontSize: "1.4rem",
-              padding: 2,
-              color: "black",
-              "& input::placeholder": { color: "#464a5b", opacity: 1 },
-            },
-            disableUnderline: true,
-          }}
-        />
-
-        {errors.image && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            Please upload an image.
-          </Typography>
-        )}
-
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          disabled={loading}
         >
-          {loading ? "Publishing..." : "Publish"}
-        </Button>
-      </Box>
+          {formData.imageUrl ? (
+            <Box display="flex" alignItems="center" gap={2}>
+              <img
+                src={formData.imageUrl}
+                alt="Uploaded"
+                style={{
+                  width: "25%",
+                  height: "auto",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  marginTop: "10px",
+                }}
+              />
+              {id && (
+                <Button
+                  variant="outlined"
+                  component="label"
+                  sx={{ mt: 2, mb: 2 }}
+                  disabled={uploading}
+                >
+                  {uploading ? "Uploading..." : "Change"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleImageUpload}
+                  />
+                </Button>
+              )}
+            </Box>
+          ) : (
+            <Button
+              variant="outlined"
+              component="label"
+              sx={{ mt: 2, mb: 2 }}
+              disabled={uploading}
+            >
+              {uploading ? "Uploading..." : "Add a Cover Image"}
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageUpload}
+              />
+            </Button>
+          )}
+            {errors.image && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              Please upload Valid image.
+            </Typography>
+          )}
+          {/* Title Input */}
+          <TextField
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            error={errors.title}
+            helperText={errors.title && "Title is required"}
+            fullWidth
+            margin="normal"
+            variant="standard"
+            placeholder="New Post title here..."
+            InputProps={{
+              fontFamily: "'Roboto Mono', monospace",
+              sx: {
+                fontSize: "2.5rem",
+                color: "black",
+                "& input::placeholder": { color: "#464a5b", opacity: 1 },
+              },
+              disableUnderline: true,
+            }}
+          />
+  
+          {/* Description Input */}
+          <TextField
+            name="desc"
+            value={formData.desc}
+            onChange={handleChange}
+            error={errors.desc}
+            helperText={errors.desc && "Description is required"}
+            fullWidth
+            multiline
+            rows={8}
+            margin="normal"
+            variant="standard"
+            placeholder="Write your post content here..."
+            InputProps={{
+              fontFamily: "'Roboto Mono', monospace",
+              sx: {
+                bgcolor: "ghostwhite",
+                fontSize: "1.4rem",
+                padding: 2,
+                color: "black",
+                "& input::placeholder": { color: "#464a5b", opacity: 1 },
+              },
+              disableUnderline: true,
+            }}
+          />
+  
+
+  
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={loading}
+          >
+            {loading ? "Publishing..." : "Publish"}
+          </Button>
+        </Box>
+      )}
     </>
   );
 };
