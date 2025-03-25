@@ -5,7 +5,7 @@ import "./App.css";
 import BlogCard from "./components/BlogCard";
 import { TextField } from "@mui/material";
 import Form from "./components/Form";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import AuthPage from "./pages/Auth";
 import PrivateRoute from "./components/PrivateRoute";
