@@ -23,6 +23,7 @@ function App() {
         <Route path=":id/edit" element={<PrivateRoute><Form/></PrivateRoute>} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path=":id/details" element={<BlogDetailPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </CustomErrorBoundary>
   );
